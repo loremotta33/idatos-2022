@@ -190,7 +190,6 @@ namespace :process_csv do
                         process_csv:process_all_star process_csv:process_end_of_season
                         process_csv:calculate_ranking)
 
-  # process_csv:process_spg process_csv:process_bpg
 
   desc 'Export to CSV'
   task original: :environment do 
@@ -203,11 +202,8 @@ namespace :process_csv do
       original_players.push(row['Name'])
     end
 
-    p 'MISSING PLAYERS'
-    p missing_players
-
     our_ranking = Player.limit(75).order("ranking desc").map {|player| player.player}
-    p our_ranking
+
     missing_in_our_ranking = []
     original_players.each do |player|
       missing_in_our_ranking.push(player) unless our_ranking.include?(player)
@@ -217,13 +213,14 @@ namespace :process_csv do
     our_ranking.each do |player|
       missing_in_original_ranking.push(player) unless original_players.include?(player)
     end
+
     p 'Players present in original ranking that aren\'t present on our ranking'
     p missing_in_our_ranking
 
     p 'Players present in our ranking that aren\'t present on original ranking '
     p missing_in_original_ranking
 
-    csv = "Position, Player, PosicionPPG, PosicionAPG, PosicionRPG, PosicionWS48, PosicionPER, PuntajeCampeonatos, PuntajeFMVP, PuntajeMVP, PuntajeAllDefense, PuntajeAllNBA, PuntajeAllStar, PuntajeRanking, ImageURL \n"
+    csv = "Position, Player, PosicionPPG, PosicionAPG, PosicionRPG, PosicionWS48, PosicionPER, PuntajeCampeonatos, PuntajeFMVP, PuntajeMVP, PuntajeAllDefense, PuntajeAllNBA, PuntajeAllStar, PuntajeRanking \n"
 
     Player.all.order("ranking desc").each_with_index do |player, index|
       csv += "#{index + 1}, #{player.csv_string}"
@@ -233,16 +230,3 @@ namespace :process_csv do
     File.open('result.csv', 'w') { |file| file.write(csv)}
   end
 end
-
-# Para preservar calidad de datos sacamos BPG - SPG
-# Agregamos todos los teams defensivos y coso ponderando
-# Ponderamos campeonatos y cosas pa no dar 75 puntos a bill russell
-
-
-# Jugaron 4509 en la NBA, estamos haciendo un ranking entre 1057
-
-#  Player.limit(75).order("ranking desc").each {|player| p "#{player.player} - #{player.ranking}"}
-
-# https://en.wikipedia.org/wiki/NBA_75th_Anniversary_Team
-# De aca salieron los originales
-# https://wikitable2csv.ggor.de/
